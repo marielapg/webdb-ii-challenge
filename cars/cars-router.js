@@ -1,19 +1,21 @@
 const express = require("express");
 const knex = require("knex");
 
-const knexConfiguration = {
-    // client answers: which type (sqlite, postgres, mysql, oracle) of database?
-    client: "sqlite3", // the db driver
-    // the rest will depend on the type of database
-    // connection could be a string or an object
-    connection: {
-        filename: "./data/car-dealer.db3",
-    },
-    useNullAsDefault: true, // ONLY needed for SQLite
-};
+const knexConfig = require('../knexfile.js')
+
+// const knexConfiguration = {
+//     // client answers: which type (sqlite, postgres, mysql, oracle) of database?
+//     client: "sqlite3", // the db driver
+//     // the rest will depend on the type of database
+//     // connection could be a string or an object
+//     connection: {
+//         filename: "./data/car-dealer.db3",
+//     },
+//     useNullAsDefault: true, // ONLY needed for SQLite
+// };
 
 // db represents a connection to the database
-const db = knex(knexConfiguration);
+const db = knex(knexConfig.development);
 
 const router = express.Router();
 
@@ -22,7 +24,7 @@ router.get("/", (req, res) => {
     // db.select('*').from('cars').then().catch();
     db("cars")
         .then(cars => {
-            res.json(cars);
+            res.status(200).json(cars);
         })
         .catch(err => {
             res.status(500).json({ message: "Failed to retrieve cars" });
@@ -45,9 +47,9 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-    const fruitData = req.body;
+    const carsData = req.body;
     db("cars")
-        .insert(fruitData) // with SQLite, by default it returns an array with the last id
+        .insert(carsData) // with SQLite, by default it returns an array with the last id
         .then(ids => {
             db("cars")
                 .where({ id: ids[0] })
